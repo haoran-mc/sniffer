@@ -1,0 +1,24 @@
+*** quick start:
+1. Clone this project: ~git clone https://github.com/haoran-mc/sniffer.git && cd sniffer/~
+2. Installation dependencies: libpcap-dev
+   #+begin_example
+     # Ubuntu
+     sudo apt install -y libpcap-dev gcc
+
+     # CentOS
+     sudo yum install -y libpcap-devel gcc
+
+     # MacOS(Homebrew)
+     brew install libpcap
+   #+end_example
+
+3. Install go dependencies: ~go mod tidy~
+4. Run: ~sudo go run . -i en0 -bpf 'tcp and port 80'~
+
+*** options:
+#+begin_example
+  -i string
+        Listen on interface, auto select one if no interface is provided.
+  -bpf string
+        Set berkeley packet filter (default empty).
+#+end_example
