@@ -42,13 +42,13 @@ func Listen(nic string) {
 
 	go func() {
 		defer handle.Close()
-		pcktChanLen := cap(pcktChan)
+		pcktChanLen := cap(pktChan)
 
 		for {
 			data, captureInfo, err := handle.ReadPacketData()
 			if err == nil {
-				if len(pcktChan) < pcktChanLen {
-					pcktChan <- &pckt{data, &captureInfo}
+				if len(pktChan) < pcktChanLen {
+					pktChan <- &packet{data, &captureInfo}
 				} // else queue drop
 				continue
 			}
