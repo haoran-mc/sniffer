@@ -45,10 +45,10 @@ func Listen(nic string) {
 		pcktChanLen := cap(pktChan)
 
 		for {
-			data, captureInfo, err := handle.ReadPacketData()
+			data, _, err := handle.ReadPacketData()
 			if err == nil {
 				if len(pktChan) < pcktChanLen {
-					pktChan <- &packet{data, &captureInfo}
+					pktChan <- &packet{data}
 				} // else queue drop
 				continue
 			}

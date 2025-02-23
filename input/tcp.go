@@ -2,7 +2,6 @@ package input
 
 import (
 	"net"
-	"time"
 )
 
 type tcpIpPacket struct {
@@ -17,6 +16,25 @@ type tcpIpPacket struct {
 	Window                       uint16
 	CheckSum                     []byte
 	Payload                      []byte
+}
 
-	Timestamp time.Time
+type msgType = uint8
+
+const (
+	Unknow msgType = iota
+	HttpRequest
+	HttpResponse
+)
+
+// detect protocol and direction
+func detectMsgType(pkt *tcpIpPacket) msgType {
+	if len(pkt.Payload) > 0 {
+		switch {
+		case HasRequestTitle(pkt.Payload):
+			return HttpRequest
+		case HasResponseTitle(pkt.Payload):
+			return HttpResponse
+		}
+	}
+	return Unknow
 }

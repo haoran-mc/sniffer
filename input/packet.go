@@ -4,14 +4,10 @@ import (
 	"encoding/binary"
 	"errors"
 	"fmt"
-	"time"
-
-	"github.com/google/gopacket"
 )
 
 type packet struct {
-	data        []byte
-	captureInfo *gopacket.CaptureInfo
+	data []byte
 }
 
 var pktChan chan *packet
@@ -26,13 +22,15 @@ func init() {
 				fmt.Println("extract packet failed:", err.Error())
 				continue
 			}
-			if pkt.captureInfo != nil {
-				tcpIpPkt.Timestamp = pkt.captureInfo.Timestamp
-			} else {
-				tcpIpPkt.Timestamp = time.Now()
-			}
-			if len(tcpIpPkt.Payload) > 0 {
-				fmt.Println(string(tcpIpPkt.Payload))
+
+			// tcpReassemble TODO TCP Segmentation
+			switch detectMsgType(tcpIpPkt) {
+			case HttpRequest:
+				fmt.Println("Request: ", tcpIpPkt)
+			case HttpResponse:
+				fmt.Println("Response: ", tcpIpPkt)
+			default:
+				fmt.Println("Unknow packet type.")
 			}
 		}
 	}()
