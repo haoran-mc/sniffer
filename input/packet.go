@@ -24,13 +24,13 @@ func init() {
 			}
 
 			// tcpReassemble TODO TCP Segmentation
-			switch detectMsgType(tcpIpPkt) {
-			case HttpRequest:
-				fmt.Println("Request: ", tcpIpPkt)
-			case HttpResponse:
-				fmt.Println("Response: ", tcpIpPkt)
-			default:
-				fmt.Println("Unknow packet type.")
+			tcpMessage := TcpMessage{
+				packet: tcpIpPkt,
+			}
+			tcpMessage.processPacket(tcpIpPkt)
+			if tcpMessage.Protocol == Http {
+				// send request
+				// receive response
 			}
 		}
 	}()
