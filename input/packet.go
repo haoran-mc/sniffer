@@ -3,7 +3,10 @@ package input
 import (
 	"encoding/binary"
 	"errors"
-	"fmt"
+
+	"github.com/buger/goreplay/proto"
+	"github.com/haoran-mc/sniffer/cache"
+	"github.com/haoran-mc/sniffer/mock"
 )
 
 type packet struct {
@@ -19,7 +22,7 @@ func init() {
 			pkt := <-pktChan
 			tcpIpPkt, err := pkt.extractTcpPacket()
 			if err != nil {
-				fmt.Println("extract packet failed:", err.Error())
+				// fmt.Println("extract packet failed:", err.Error())
 				continue
 			}
 
@@ -29,8 +32,31 @@ func init() {
 			}
 			tcpMessage.processPacket(tcpIpPkt)
 			if tcpMessage.Protocol == Http {
-				// send request
-				// receive response
+				cacheId := string(tcpMessage.uuid)
+
+				switch tcpMessage.Direction {
+				case DirIncoming:
+					req := tcpMessage.packet.Payload
+					req = proto.AddHeader(req, []byte("X-SnifferId"), []byte(cacheId))
+
+					_, get := cache.GetResponse(cacheId)
+					if get {
+						mock.SendRequest(req)
+					} else {
+						cache.SetRequest(cacheId, req)
+					}
+
+				case DirOutcoming:
+					resp := tcpMessage.packet.Payload
+					req, get := cache.GetRequest(cacheId)
+					if get {
+						mock.SendRequest(req)
+						cache.SetResponse(cacheId, resp)
+						cache.DelRequest(cacheId)
+					} else {
+						cache.SetResponse(cacheId, resp)
+					}
+				}
 			}
 		}
 	}()

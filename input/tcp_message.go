@@ -36,9 +36,11 @@ func (tcpMessage *TcpMessage) processPacket(pkt *tcpIpPacket) {
 		case HasRequestTitle(pkt.Payload):
 			tcpMessage.Protocol = Http
 			tcpMessage.Direction = DirIncoming
+			tcpMessage.uuid = tcpMessage.UUID()
 		case HasResponseTitle(pkt.Payload):
 			tcpMessage.Protocol = Http
 			tcpMessage.Direction = DirOutcoming
+			tcpMessage.uuid = tcpMessage.UUID()
 		}
 	}
 }

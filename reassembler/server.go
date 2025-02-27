@@ -23,8 +23,8 @@ func proxyHandler(ctx *fasthttp.RequestCtx) {
 		return
 	}
 
-	// fmt.Println(string(req.Body()))
-	// fmt.Println(string(resp.Body()))
+	// fmt.Println("─────", string(req.Body()))
+	// fmt.Println("─────", string(resp.Body()))
 
 	// 将响应复制回客户端
 	ctx.SetStatusCode(resp.StatusCode())
