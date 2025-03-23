@@ -1,37 +1,40 @@
 package cache
 
+import "sync"
+
 var (
-	requestCache  map[string][]byte
-	responseCache map[string][]byte
+	requestCache  sync.Map
+	responseCache sync.Map
 )
 
-func init() {
-	requestCache = make(map[string][]byte)
-	responseCache = make(map[string][]byte)
-}
-
 func GetRequest(cacheId string) ([]byte, bool) {
-	req, get := requestCache[cacheId]
-	return req, get
+	req, get := requestCache.Load(cacheId)
+	if !get {
+		return nil, false
+	}
+	return req.([]byte), true
 }
 
 func SetRequest(cacheId string, request []byte) {
-	requestCache[cacheId] = request
+	requestCache.Store(cacheId, request)
 }
 
 func DelRequest(cacheId string) {
-	delete(requestCache, cacheId)
+	requestCache.Delete(cacheId)
 }
 
 func GetResponse(cacheId string) ([]byte, bool) {
-	resp, get := responseCache[cacheId]
-	return resp, get
+	resp, get := responseCache.Load(cacheId)
+	if !get {
+		return nil, false
+	}
+	return resp.([]byte), true
 }
 
 func SetResponse(cacheId string, response []byte) {
-	responseCache[cacheId] = response
+	responseCache.Store(cacheId, response)
 }
 
 func DelResponse(cacheId string) {
-	delete(responseCache, cacheId)
+	responseCache.Delete(cacheId)
 }
