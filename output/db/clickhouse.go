@@ -8,6 +8,7 @@ import (
 
 	"github.com/ClickHouse/clickhouse-go/v2"
 	"github.com/ClickHouse/clickhouse-go/v2/lib/driver"
+	"github.com/haoran-mc/golib/pkg/env"
 )
 
 var conn driver.Conn
@@ -23,7 +24,7 @@ func InitClickhouse() {
 		Auth: clickhouse.Auth{
 			Database: "default",
 			Username: "default",
-			Password: "", // TODO environment
+			Password: env.GetEnv("CLICKHOUSE_PASSWORD", ""),
 		},
 		Debugf: func(format string, v ...any) {
 			fmt.Printf(format, v)

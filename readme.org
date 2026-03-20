@@ -13,7 +13,8 @@
    #+end_example
 
 3. Install go dependencies: ~go mod tidy~
-4. Run: ~sudo go run . -i en0 -bpf 'tcp and port 80'~
+4. Set ClickHouse password env: ~export CLICKHOUSE_PASSWORD='your-password'~
+5. Run: ~sudo go run . -i en0 -bpf 'tcp and port 80'~
 
 *** options:
 #+begin_example
