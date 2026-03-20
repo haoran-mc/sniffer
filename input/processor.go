@@ -6,6 +6,7 @@ type packetProcessor struct {
 }
 
 func newPacketProcessor() *packetProcessor {
+	// 这里先保留一个最小处理流水线：识别后直接分发。
 	return &packetProcessor{
 		detector:   messageDetector{},
 		dispatcher: messageDispatcher{},
@@ -24,19 +25,4 @@ func (p *packetProcessor) process(pkt *packet) {
 	}
 
 	p.dispatcher.dispatch(tcpMessage)
-}
-
-type messageDetector struct{}
-
-func (messageDetector) detect(pkt *tcpIpPacket) *TcpMessage {
-	// tcpReassemble TODO TCP Segmentation
-	tcpMessage := &TcpMessage{
-		packet: pkt,
-	}
-	tcpMessage.processPacket(pkt)
-	if tcpMessage.Protocol == Unknown {
-		return nil
-	}
-
-	return tcpMessage
 }
