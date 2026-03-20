@@ -2,23 +2,28 @@ package input
 
 type messageDetector struct{}
 
-func (messageDetector) detect(pkt *tcpIpPacket) *TcpMessage {
-	// 当前仍然是基于单个 TCP payload 做协议识别，后续再引入重组能力。
-	return detectTCPMessage(pkt)
+func (messageDetector) detect(flow *tcpFlow, pkt *tcpIpPacket) *TcpMessage {
+	// 检测入口已经切到流上下文，后续可以在这里平滑接入真正的 TCP 重组。
+	return detectTCPMessage(flow, pkt)
 }
 
-func detectTCPMessage(pkt *tcpIpPacket) *TcpMessage {
+func detectTCPMessage(flow *tcpFlow, pkt *tcpIpPacket) *TcpMessage {
 	if len(pkt.Payload) == 0 {
 		return nil
 	}
 
-	protocol, direction, ok := detectApplicationMessage(pkt.Payload)
+	candidatePayload := flow.candidatePayload(pkt)
+	protocol, direction, ok := detectApplicationMessage(candidatePayload)
 	if !ok {
+		flow.remember(pkt)
 		return nil
 	}
 
+	flow.reset(pkt)
+
 	return &TcpMessage{
 		packet:    pkt,
+		payload:   candidatePayload,
 		Protocol:  protocol,
 		Direction: direction,
 		uuid:      buildMessageUUID(pkt, direction),

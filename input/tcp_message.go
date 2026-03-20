@@ -16,9 +16,22 @@ const (
 )
 
 type TcpMessage struct {
-	packet *tcpIpPacket
+	packet  *tcpIpPacket
+	payload []byte
 
 	Protocol  ApplicationLayerType
 	Direction Dir
 	uuid      []byte
+}
+
+func (m *TcpMessage) Payload() []byte {
+	if len(m.payload) > 0 {
+		return m.payload
+	}
+
+	if m.packet == nil {
+		return nil
+	}
+
+	return m.packet.Payload
 }

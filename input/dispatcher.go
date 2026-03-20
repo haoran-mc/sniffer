@@ -10,13 +10,14 @@ type messageDispatcher struct{}
 
 func (messageDispatcher) dispatch(message *TcpMessage) {
 	cacheID := string(message.uuid)
+	payload := message.Payload()
 
 	// 按请求方向和响应方向走不同的缓存与回放路径。
 	switch message.Direction {
 	case DirIncoming:
-		dispatchRequest(cacheID, message.packet.Payload)
+		dispatchRequest(cacheID, payload)
 	case DirOutcoming:
-		dispatchResponse(cacheID, message.packet.Payload)
+		dispatchResponse(cacheID, payload)
 	}
 }
 
