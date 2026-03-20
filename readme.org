@@ -1,3 +1,4 @@
+
 *** quick start:
 1. Clone this project: ~git clone https://github.com/haoran-mc/sniffer.git && cd sniffer/~
 2. Installation dependencies: libpcap-dev
@@ -22,4 +23,36 @@
         Listen on interface, auto select one if no interface is provided.
   -bpf string
         Set berkeley packet filter (default empty).
+#+end_example
+
+*** project structure:
+# listen.go → packet.go → processor.go → dispatcher.go → mock/client.go → reassembler/ → mock/server.go
+
+#+begin_example
+  .
+  ├── cache
+  │   └── cache.go
+  ├── input
+  │   ├── dispatcher.go   # 4. 消息分发层，读写缓存、匹配请求响应，请求转发给 mock 链路
+  │   ├── http.go         # HTTP 报文识别工具，判断 payload 是否是 HTTP 请求行或响应行
+  │   ├── listen.go       # 1. 网卡抓包入口
+  │   ├── packet.go       # 2. 原始报文解码层，eth 报文解析为 tcp/ip 报文
+  │   ├── processor.go    # 3. 报文处理协调器，解码后的报文 -> 协议识别 -> 消息分发
+  │   ├── tcp_message.go  # 协议类型、方向和关联ID
+  │   └── tcp_pkt.go      # TCP/IP 数据结构定义
+  ├── log
+  ├── mock
+  │   ├── client.go
+  │   └── server.go
+  ├── output
+  │   └── db
+  │       ├── clickhouse.go
+  │       ├── model.go
+  │       └── table.sql
+  ├── reassembler
+  │   └── server.go
+  ├── setting/
+  ├── go.mod
+  ├── go.sum
+  └── main.go
 #+end_example

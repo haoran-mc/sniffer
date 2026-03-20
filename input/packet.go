@@ -3,10 +3,6 @@ package input
 import (
 	"encoding/binary"
 	"errors"
-
-	"github.com/buger/goreplay/proto"
-	"github.com/haoran-mc/sniffer/cache"
-	"github.com/haoran-mc/sniffer/mock"
 )
 
 type packet struct {
@@ -16,48 +12,13 @@ type packet struct {
 var pktChan chan *packet
 
 func init() {
+	// 使用内部队列串联抓包线程和后续处理流水线。
 	pktChan = make(chan *packet, 1000) // maximum number of packets in the receive queue
+	processor := newPacketProcessor()
 	go func() {
 		for {
 			pkt := <-pktChan
-			tcpIpPkt, err := pkt.extractTcpPacket()
-			if err != nil {
-				// fmt.Println("extract packet failed:", err.Error())
-				continue
-			}
-
-			// tcpReassemble TODO TCP Segmentation
-			tcpMessage := TcpMessage{
-				packet: tcpIpPkt,
-			}
-			tcpMessage.processPacket(tcpIpPkt)
-			if tcpMessage.Protocol == Http {
-				cacheId := string(tcpMessage.uuid)
-
-				switch tcpMessage.Direction {
-				case DirIncoming:
-					req := tcpMessage.packet.Payload
-					req = proto.AddHeader(req, []byte("X-SnifferId"), []byte(cacheId))
-
-					_, get := cache.GetResponse(cacheId)
-					if get {
-						mock.SendRequest(req)
-					} else {
-						cache.SetRequest(cacheId, req)
-					}
-
-				case DirOutcoming:
-					resp := tcpMessage.packet.Payload
-					req, get := cache.GetRequest(cacheId)
-					if get {
-						mock.SendRequest(req)
-						cache.SetResponse(cacheId, resp)
-						cache.DelRequest(cacheId)
-					} else {
-						cache.SetResponse(cacheId, resp)
-					}
-				}
-			}
+			processor.process(pkt)
 		}
 	}()
 }
@@ -68,6 +29,7 @@ func (pkt *packet) extractTcpPacket() (tcpIpPkt *tcpIpPacket, err error) {
 	}
 
 	tcpIpPkt = new(tcpIpPacket)
+	// 跳过以太网头，从 IP 层开始解析。
 	var ipPkt = pkt.data[14:] // ethernet header length is 14
 	var tcpSeg = []byte{}
 
