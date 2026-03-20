@@ -3,7 +3,7 @@ package input
 import (
 	"github.com/buger/goreplay/proto"
 	"github.com/haoran-mc/sniffer/cache"
-	"github.com/haoran-mc/sniffer/mock"
+	"github.com/haoran-mc/sniffer/replay"
 )
 
 type messageDispatcher struct{}
@@ -27,7 +27,7 @@ func dispatchRequest(cacheID string, payload []byte) {
 
 	_, hasResponse := cache.GetResponse(cacheID)
 	if hasResponse {
-		mock.SendRequest(request)
+		replay.ReplayRequest(request)
 		return
 	}
 
@@ -38,7 +38,7 @@ func dispatchResponse(cacheID string, payload []byte) {
 	request, hasRequest := cache.GetRequest(cacheID)
 	if hasRequest {
 		// 先回放请求，再缓存响应，维持现有处理顺序不变。
-		mock.SendRequest(request)
+		replay.ReplayRequest(request)
 		cache.SetResponse(cacheID, payload)
 		cache.DelRequest(cacheID)
 		return

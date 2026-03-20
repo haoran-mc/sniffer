@@ -26,13 +26,12 @@
 #+end_example
 
 *** project structure:
-# listen.go → packet.go → processor.go → dispatcher.go → mock/client.go → reassembler/ → mock/server.go
+# listen.go → packet.go → processor.go → dispatcher.go → replay/client.go → proxy/ → replay/server.go
 
 #+begin_example
   .
-  ├── cache
-  │   └── cache.go
-  ├── input
+  ├── cache/
+  ├── input/
   │   ├── dispatcher.go   # 4. 消息分发层，读写缓存、匹配请求响应，请求转发给 mock 链路
   │   ├── http.go         # HTTP 报文识别工具，判断 payload 是否是 HTTP 请求行或响应行
   │   ├── listen.go       # 1. 网卡抓包入口
@@ -40,16 +39,15 @@
   │   ├── processor.go    # 3. 报文处理协调器，解码后的报文 -> 协议识别 -> 消息分发
   │   ├── tcp_message.go  # 协议类型、方向和关联ID
   │   └── tcp_pkt.go      # TCP/IP 数据结构定义
-  ├── log
-  ├── mock
-  │   ├── client.go
-  │   └── server.go
-  ├── output
+  ├── output/
   │   └── db
   │       ├── clickhouse.go
   │       ├── model.go
   │       └── table.sql
-  ├── reassembler
+  ├── proxy/
+  │   └── server.go
+  ├── replay/
+  │   ├── client.go
   │   └── server.go
   ├── setting/
   ├── go.mod

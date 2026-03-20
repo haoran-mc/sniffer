@@ -1,4 +1,4 @@
-package mock
+package replay
 
 import (
 	"bytes"
@@ -9,7 +9,7 @@ import (
 	"github.com/buger/goreplay/proto"
 )
 
-func SendRequest(request []byte) {
+func ReplayRequest(request []byte) {
 	// 修正 Content-Length
 	if contentLenStr := proto.Header(request, []byte("Content-Length")); len(contentLenStr) > 0 {
 		contentLen, _ := strconv.Atoi(string(contentLenStr))

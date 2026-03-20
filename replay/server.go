@@ -1,4 +1,4 @@
-package mock
+package replay
 
 import (
 	"fmt"
@@ -9,9 +9,9 @@ import (
 	"github.com/haoran-mc/sniffer/cache"
 )
 
-const BUF_SIZE int = 1024
+const bufSize = 1024
 
-func MockServerStart() {
+func StartResponseServer() {
 	listener, err := net.Listen("tcp", "127.0.0.1:9523")
 	if err != nil {
 		log.Fatal("fail to listen: ", err.Error())
@@ -25,7 +25,6 @@ func MockServerStart() {
 			continue
 		}
 
-		// 监听到一个客户连接，处理
 		go handleConnection(conn)
 	}
 }
@@ -33,7 +32,7 @@ func MockServerStart() {
 func handleConnection(conn net.Conn) {
 	defer conn.Close()
 
-	buf := make([]byte, BUF_SIZE)
+	buf := make([]byte, bufSize)
 	n, err := conn.Read(buf)
 	if err != nil {
 		fmt.Println("Fail to read data:", err.Error())
@@ -41,8 +40,8 @@ func handleConnection(conn net.Conn) {
 	}
 	req := buf[:n]
 
-	cacheId := string(proto.Header(req, []byte("X-SnifferId")))
-	resp, ok := cache.GetResponse(cacheId)
+	cacheID := string(proto.Header(req, []byte("X-SnifferId")))
+	resp, ok := cache.GetResponse(cacheID)
 	if ok {
 		_, err = conn.Write([]byte(resp))
 		if err != nil {
